@@ -11,7 +11,6 @@
 
   <!-- ============ STYLES ============ -->
   <style>
-    /* ---------- Design tokens & reset (Tema Cinnamoroll) ---------- */
     :root {
       --bg:        #0c121e;
       --bg-2:      #141c2e;
@@ -20,12 +19,12 @@
       --border:    #32466e;
       --text:      #f0f5ff;
       --muted:     #8ca2cc;
-      --primary:   #a2d2ff; /* Azul Cinnamoroll */
+      --primary:   #a2d2ff;
       --primary-2: #80bfff;
-      --danger:    #ffb5a7; /* Rosa Suave */
+      --danger:    #ffb5a7;
       --success:   #b7e4c7;
       --warning:   #ffe5ec;
-      --xp:        #c8b6ff; /* Lilás Suave */
+      --xp:        #c8b6ff;
       --hp:        #ff9ebb;
       --hp-empty:  #3a2027;
       --radius:    14px;
@@ -35,7 +34,6 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     html, body { height: 100%; }
 
     body {
@@ -52,7 +50,6 @@
 
     .app { width: 100%; max-width: 1080px; }
 
-    /* ---------- Shared UI ---------- */
     .card {
       background: linear-gradient(180deg, var(--panel) 0%, var(--bg-2) 100%);
       border: 1px solid var(--border);
@@ -103,7 +100,6 @@
     .notice.ok  { color: var(--success); }
     .notice.err { color: var(--danger); }
 
-    /* ---------- AUTH ---------- */
     .auth-shell { max-width: 420px; margin: 0 auto; }
     .auth-card { padding: 28px; }
 
@@ -135,7 +131,6 @@
     .switch-auth { text-align: center; margin-top: 16px; font-size: 13px; color: var(--muted); }
     .switch-auth a { color: var(--primary); cursor: pointer; font-weight: 600; }
 
-    /* ---------- DASHBOARD ---------- */
     .dashboard { padding: 24px; }
     .dash-top {
       display: flex;
@@ -184,9 +179,6 @@
     .dash-actions { display: flex; gap: 12px; flex-wrap: wrap; }
     .dash-actions .btn-primary { flex: 1; min-width: 180px; padding: 15px; font-size: 17px; }
 
-    .loading-line { color: var(--muted); font-size: 13px; margin-top: 12px; }
-
-    /* ---------- GAME ---------- */
     .game-shell { padding: 18px; }
     .game-hud {
       display: grid;
@@ -202,7 +194,6 @@
     .hud-row .k { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; margin-right: 4px; }
 
     .bar { width: 240px; max-width: 45vw; }
-    .bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 700; }
     .bar-track { height: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 999px; transition: width .12s linear; }
     .bar-fill.hp { background: linear-gradient(90deg, #ffb5a7, var(--hp)); }
@@ -218,11 +209,11 @@
       height: auto;
       display: block;
       border-radius: 10px;
-      background: #080d17;
+      background: #0b1120;
       border: 1px solid var(--border);
+      image-rendering: pixelated;
     }
 
-    /* Overlays */
     .overlay {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
@@ -235,7 +226,6 @@
     .overlay-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; } 
     .overlay-sub { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
 
-    /* Level-up upgrade cards */
     .upgrade-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
     .upgrade-card {
       text-align: left;
@@ -252,7 +242,6 @@
     .upgrade-card .u-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
     .upgrade-card .u-icon { font-size: 20px; }
 
-    /* Game over stats */
     .go-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
     .go-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
     .go-stat .v { font-size: 20px; font-weight: 800; font-family: var(--mono); }
@@ -269,13 +258,11 @@
         <div class="logo">CINNA EVOLUTION</div>
         <div class="tagline">Evolua, flutue e sobreviva...</div>
 
-        <!-- AUTH TABS -->
         <div class="auth-tabs" id="auth-tabs">
           <button class="active" data-tab="login">LOGIN</button>
           <button data-tab="signup">SIGN UP</button>
         </div>
 
-        <!-- LOGIN FORM -->
         <form class="auth-form" id="login-form">
           <div class="field">
             <label for="login-email">Email</label>
@@ -289,7 +276,6 @@
           <div class="notice" id="login-notice"></div>
         </form>
 
-        <!-- SIGNUP FORM -->
         <form class="auth-form hidden" id="signup-form">
           <div class="field">
             <label for="signup-email">Email</label>
@@ -303,7 +289,6 @@
           <div class="notice" id="signup-notice"></div>
         </form>
 
-        <!-- SWITCH AUTH -->
         <div class="switch-auth">
           <a id="switch-auth">Não tem conta? Registe-se</a>
         </div>
@@ -324,7 +309,6 @@
           <button class="btn-danger" id="logout-btn">SAIR</button>
         </div>
 
-        <!-- STATS GRID -->
         <div class="dash-grid">
           <div class="stat-tile hi">
             <div class="value" id="user-level">1</div>
@@ -340,23 +324,15 @@
           </div>
         </div>
 
-        <!-- ACHIEVEMENTS -->
         <div class="achievements">
           <h3>CONQUISTAS</h3>
           <div class="ach-list">
-            <div class="ach" id="ach-1">
-              <span class="dot"></span> Nível 5
-            </div>
-            <div class="ach" id="ach-2">
-              <span class="dot"></span> 100 Kills
-            </div>
-            <div class="ach" id="ach-3">
-              <span class="dot"></span> 1000 XP
-            </div>
+            <div class="ach" id="ach-1"><span class="dot"></span> Nível 5</div>
+            <div class="ach" id="ach-2"><span class="dot"></span> 100 Kills</div>
+            <div class="ach" id="ach-3"><span class="dot"></span> 1000 XP</div>
           </div>
         </div>
 
-        <!-- DASHBOARD ACTIONS -->
         <div class="dash-actions">
           <button class="btn-primary" id="start-game-btn">INICIAR JOGO</button>
         </div>
@@ -370,17 +346,13 @@
           <div class="hud-row">
             <div class="k">HP</div>
             <div class="bar" id="hp-bar">
-              <div class="bar-track">
-                <div class="bar-fill hp" id="hp-fill"></div>
-              </div>
+              <div class="bar-track"><div class="bar-fill hp" id="hp-fill"></div></div>
             </div>
           </div>
           <div class="hud-row">
             <div class="k">XP</div>
             <div class="bar" id="xp-bar">
-              <div class="bar-track">
-                <div class="bar-fill xp" id="xp-fill"></div>
-              </div>
+              <div class="bar-track"><div class="bar-fill xp" id="xp-fill"></div></div>
             </div>
           </div>
         </div>
@@ -410,22 +382,10 @@
         <div class="overlay-title" style="color: var(--danger);">GAME OVER</div>
         <div class="overlay-sub">Suas estatísticas:</div>
         <div class="go-stats" id="go-stats">
-          <div class="go-stat">
-            <div class="v" id="go-level">1</div>
-            <div class="l">NÍVEL</div>
-          </div>
-          <div class="go-stat">
-            <div class="v" id="go-xp">0</div>
-            <div class="l">XP</div>
-          </div>
-          <div class="go-stat">
-            <div class="v" id="go-kills">0</div>
-            <div class="l">KILLS</div>
-          </div>
-          <div class="go-stat">
-            <div class="v" id="go-time">0:00</div>
-            <div class="l">TEMPO</div>
-          </div>
+          <div class="go-stat"><div class="v" id="go-level">1</div><div class="l">NÍVEL</div></div>
+          <div class="go-stat"><div class="v" id="go-xp">0</div><div class="l">XP</div></div>
+          <div class="go-stat"><div class="v" id="go-kills">0</div><div class="l">KILLS</div></div>
+          <div class="go-stat"><div class="v" id="go-time">0:00</div><div class="l">TEMPO</div></div>
         </div>
         <div class="go-actions">
           <button class="btn-primary" id="retry-btn">JOGAR NOVAMENTE</button>
@@ -434,7 +394,6 @@
     </div>
   </div>
 
-  <!-- ============ JAVASCRIPT LOGIC ============ -->
   <script>
     // Supabase client setup
     const supabaseUrl = 'https://xviolnsyxdtujcgffiny.supabase.co';
@@ -468,53 +427,144 @@
     const upgradeGrid = document.getElementById('upgrade-grid');
     const retryBtn = document.getElementById('retry-btn');
 
-    // User & Game state
-    let user = null;
-    let player = null;
-    let gameInterval = null;
-    let waveInterval = null;
-    let autoShootInterval = null;
-    let levelUp = false;
-    let gameOver = false;
+    // Game State
+    let user = null, player = null;
+    let gameInterval = null, waveInterval = null, autoShootInterval = null;
+    let levelUp = false, gameOver = false;
 
-    // Game constants
-    const canvasWidth = 800;
-    const canvasHeight = 600;
-    let playerSpeed = 5;
-    let enemySpeed = 2;
-    let bulletSpeed = 10;
-    const spawnInterval = 1000;
-    const waveDuration = 20000;
+    const canvasWidth = 800, canvasHeight = 600;
+    let playerSpeed = 5, enemySpeed = 2, bulletSpeed = 10;
+    const spawnInterval = 1000, waveDuration = 20000;
 
-    let playerEntity = {
-      x: canvasWidth / 2 - 20,
-      y: canvasHeight / 2 - 20,
-      width: 40,
-      height: 40
+    let playerEntity = { 
+      x: canvasWidth / 2 - 20, 
+      y: canvasHeight / 2 - 20, 
+      width: 44, 
+      height: 44,
+      isMoving: false,
+      facingLeft: false,
+      walkFrame: 0
     };
 
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
-    // Load assets
-    const playerImage = new Image();
-    playerImage.src = 'player.png';
+    let enemies = [], bullets = [];
+    let level = 1, xp = 0, kills = 0;
+    let waveStart = Date.now(), waveEnd = waveStart + waveDuration;
 
-    const enemyImage = new Image();
-    enemyImage.src = 'enemy.png';
+    const bgStars = Array.from({ length: 40 }, () => ({
+      x: Math.random() * canvasWidth,
+      y: Math.random() * canvasHeight,
+      size: Math.random() > 0.5 ? 2 : 4,
+      alpha: Math.random()
+    }));
 
-    const bulletImage = new Image();
-    bulletImage.src = 'bullet.png';
+    // ================= ANIMAÇÃO E DESENHO DO CINNA ================= //
 
-    let enemies = [];
-    let bullets = [];
-    let level = 1;
-    let xp = 0;
-    let kills = 0;
-    let waveStart = Date.now();
-    let waveEnd = waveStart + waveDuration;
+    function drawCinnaPixelArt(x, y) {
+      ctx.save();
+      ctx.translate(x, y);
 
-    // Auth functions
+      // Virar o personagem para a esquerda se estiver a andar para a esquerda
+      if (playerEntity.facingLeft) {
+        ctx.translate(44, 0);
+        ctx.scale(-1, 1);
+      }
+
+      // Efeito de flutuação suave ou animação de passos
+      let legOffsetLeft = 0;
+      let legOffsetRight = 0;
+      let bodyY = 0;
+
+      if (playerEntity.isMoving) {
+        playerEntity.walkFrame += 0.25;
+        legOffsetLeft = Math.sin(playerEntity.walkFrame) * 4;
+        legOffsetRight = -Math.sin(playerEntity.walkFrame) * 4;
+        bodyY = Math.abs(Math.sin(playerEntity.walkFrame)) * -2;
+      } else {
+        playerEntity.walkFrame += 0.05;
+        bodyY = Math.sin(playerEntity.walkFrame) * 2; // Flutuação em descanso
+      }
+
+      // 1. Perninhas (Desenhadas atrás do corpo)
+      ctx.fillStyle = '#ffffff';
+      // Perna Esquerda
+      ctx.beginPath();
+      ctx.roundRect(14, 30 + legOffsetLeft, 6, 8, 3);
+      ctx.fill();
+      // Perna Direita
+      ctx.beginPath();
+      ctx.roundRect(24, 30 + legOffsetRight, 6, 8, 3);
+      ctx.fill();
+
+      // 2. Orelhas de Nuvem
+      ctx.beginPath();
+      ctx.ellipse(2, 22 + bodyY, 12, 7, -0.2, 0, Math.PI * 2);
+      ctx.ellipse(42, 22 + bodyY, 12, 7, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 3. Corpo/Cabeça
+      ctx.beginPath();
+      ctx.roundRect(10, 10 + bodyY, 24, 22, 8);
+      ctx.fill();
+
+      // 4. Olhos Castanhos
+      ctx.fillStyle = '#6c4f3d';
+      ctx.fillRect(16, 18 + bodyY, 3, 5);
+      ctx.fillRect(25, 18 + bodyY, 3, 5);
+
+      // 5. Bochechas Rosadas
+      ctx.fillStyle = '#ffb5c5';
+      ctx.fillRect(13, 23 + bodyY, 4, 3);
+      ctx.fillRect(27, 23 + bodyY, 4, 3);
+
+      // 6. Boca Fofa (W)
+      ctx.strokeStyle = '#6c4f3d';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(20, 22 + bodyY, 2, 0, Math.PI, false);
+      ctx.arc(24, 22 + bodyY, 2, 0, Math.PI, false);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Inimigo (Nuvem Negra)
+    function drawEnemyPixelArt(x, y) {
+      ctx.save();
+      ctx.translate(x, y);
+
+      ctx.fillStyle = '#2d3748';
+      ctx.beginPath();
+      ctx.arc(15, 18, 12, 0, Math.PI * 2);
+      ctx.arc(25, 14, 10, 0, Math.PI * 2);
+      ctx.arc(32, 22, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ff7675';
+      ctx.fillRect(14, 16, 3, 3);
+      ctx.fillRect(24, 16, 3, 3);
+
+      ctx.restore();
+    }
+
+    // Projétil (Estrela)
+    function drawBulletPixelArt(x, y) {
+      ctx.save();
+      ctx.fillStyle = '#ffeaa7';
+      ctx.shadowColor = '#fdcb6e';
+      ctx.shadowBlur = 6;
+
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // ================= AUTENTICAÇÃO SUPABASE ================= //
+
     async function login(email, password) {
       loginNotice.textContent = 'A autenticar...';
       loginNotice.className = 'notice';
@@ -531,23 +581,17 @@
     async function signup(email, password) {
       signupNotice.textContent = 'A criar conta...';
       signupNotice.className = 'notice';
-      
       const { data, error } = await _supabase.auth.signUp({ email, password });
-      
       if (error) {
         signupNotice.textContent = error.message;
         signupNotice.classList.add('err');
       } else {
         user = data.user;
-        
-        // Se a sessão foi criada de imediato
         if (data.session) {
           signupNotice.textContent = 'Conta criada com sucesso!';
           signupNotice.classList.add('ok');
           await createProfile();
         } else {
-          // Se o Supabase exigir login manual após criar conta
-          signupNotice.textContent = 'Registo efetuado! A iniciar sessão...';
           await login(email, password);
         }
       }
@@ -555,8 +599,7 @@
 
     async function logout() {
       await _supabase.auth.signOut();
-      user = null;
-      player = null;
+      user = null; player = null;
       resetUI();
     }
 
@@ -584,7 +627,8 @@
       }
     }
 
-    // UI functions
+    // ================= CONTROLO DE INTERFACE ================= //
+
     function resetUI() {
       authShell.classList.remove('hidden');
       dashboardShell.classList.add('hidden');
@@ -612,21 +656,17 @@
       gameOverOverlay.classList.add('hidden');
       levelUpOverlay.classList.add('hidden');
       
-      playerEntity.x = canvasWidth / 2 - 20;
-      playerEntity.y = canvasHeight / 2 - 20;
+      playerEntity.x = canvasWidth / 2 - 22;
+      playerEntity.y = canvasHeight / 2 - 22;
 
       clearInterval(gameInterval);
       clearInterval(waveInterval);
       clearInterval(autoShootInterval);
 
-      if (!player) {
-        player = { level: 1, xp: 0, kills: 0, hp: 100, max_hp: 100 };
-      } else {
-        player.hp = player.max_hp || 100;
-      }
+      if (!player) player = { level: 1, xp: 0, kills: 0, hp: 100, max_hp: 100 };
+      else player.hp = player.max_hp || 100;
 
-      gameOver = false;
-      levelUp = false;
+      gameOver = false; levelUp = false;
 
       gameLoop();
       spawnEnemies();
@@ -634,7 +674,7 @@
 
       autoShootInterval = setInterval(() => {
         if (!gameOver && !levelUp) shootBullet();
-      }, 400);
+      }, 380);
     }
 
     function updateUI() {
@@ -658,7 +698,8 @@
       if (ach3) ach3.classList.toggle('unlocked', player.xp >= 1000);
     }
 
-    // Game loop & physics
+    // ================= LOOP DO JOGO ================= //
+
     function gameLoop() {
       gameInterval = setInterval(() => {
         if (!gameOver && !levelUp) {
@@ -684,7 +725,7 @@
       else if (side === 2) { x = Math.random() * canvasWidth; y = canvasHeight + 40; }
       else { x = -40; y = Math.random() * canvasHeight; }
 
-      return { x, y, speed: enemySpeed, width: 30, height: 30 };
+      return { x, y, speed: enemySpeed, width: 36, height: 32 };
     }
 
     function updateEntities() {
@@ -712,9 +753,9 @@
       bullets.forEach((bullet, bulletIndex) => {
         enemies.forEach((enemy, enemyIndex) => {
           if (bullet.x < enemy.x + enemy.width &&
-              bullet.x + bullet.width > enemy.x &&
+              bullet.x + 8 > enemy.x &&
               bullet.y < enemy.y + enemy.height &&
-              bullet.y + bullet.height > enemy.y) {
+              bullet.y + 8 > enemy.y) {
             enemies.splice(enemyIndex, 1);
             bullets.splice(bulletIndex, 1);
             kills++;
@@ -745,35 +786,24 @@
     function renderEntities() {
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
+      // Fundo estrelado
+      bgStars.forEach(s => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+        ctx.fillRect(s.x, s.y, s.size, s.size);
+      });
+
       // Render Inimigos
       enemies.forEach(enemy => {
-        if (enemyImage.complete && enemyImage.naturalWidth !== 0) {
-          ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
-        } else {
-          ctx.fillStyle = '#ffb5a7'; // Rosa Cinnamoroll
-          ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-        }
+        drawEnemyPixelArt(enemy.x, enemy.y);
       });
 
       // Render Projéteis
       bullets.forEach(bullet => {
-        if (bulletImage.complete && bulletImage.naturalWidth !== 0) {
-          ctx.drawImage(bulletImage, bullet.x, bullet.y, bullet.width, bullet.height);
-        } else {
-          ctx.fillStyle = '#ffe5ec';
-          ctx.beginPath();
-          ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        drawBulletPixelArt(bullet.x, bullet.y);
       });
 
-      // Render Jogador (Azul Nuvens Cinnamoroll)
-      if (playerImage.complete && playerImage.naturalWidth !== 0) {
-        ctx.drawImage(playerImage, playerEntity.x, playerEntity.y, playerEntity.width, playerEntity.height);
-      } else {
-        ctx.fillStyle = '#a2d2ff';
-        ctx.fillRect(playerEntity.x, playerEntity.y, playerEntity.width, playerEntity.height);
-      }
+      // Render Cinna com animação
+      drawCinnaPixelArt(playerEntity.x, playerEntity.y);
     }
 
     function startWaveTimer() {
@@ -821,8 +851,8 @@
 
       const upgrades = [
         { name: 'HP + 10', desc: 'Aumenta a vida máxima.', icon: '❤️', effect: () => { player.max_hp += 10; player.hp = player.max_hp; } },
-        { name: 'Velocidade + 1', desc: 'Movimente-se mais rápido.', icon: '💨', effect: () => { playerSpeed += 1; } },
-        { name: 'Dano + 2', desc: 'Projetil mais rápido.', icon: '⚔️', effect: () => { bulletSpeed += 2; } }
+        { name: 'Velocidade + 1', desc: 'Caminhe mais rápido.', icon: '🐾', effect: () => { playerSpeed += 1; } },
+        { name: 'Estrelas + 2', desc: 'Tiro mágico acelerado.', icon: '⭐', effect: () => { bulletSpeed += 2; } }
       ];
 
       upgrades.forEach(upgrade => {
@@ -863,7 +893,7 @@
 
     async function saveGameStats() {
       if (!user || !player) return;
-      const { error } = await _supabase
+      await _supabase
         .from('profiles')
         .update({
           level: player.level,
@@ -873,16 +903,11 @@
           max_hp: player.max_hp
         })
         .eq('id', user.id);
-
-      if (error) console.error('Error saving game stats:', error);
     }
 
     function resetGame() {
-      enemies = [];
-      bullets = [];
-      level = 1;
-      kills = 0;
-      gameOver = false;
+      enemies = []; bullets = [];
+      level = 1; kills = 0; gameOver = false;
       player.hp = player.max_hp || 100;
       clearInterval(gameInterval);
       clearInterval(waveInterval);
@@ -894,41 +919,16 @@
       startGame();
     }
 
-    // Event listeners
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
-      await login(email, password);
-    });
-
-    signupForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('signup-email').value;
-      const password = document.getElementById('signup-password').value;
-      await signup(email, password);
-    });
-
-    switchAuth.addEventListener('click', () => {
-      loginForm.classList.toggle('hidden');
-      signupForm.classList.toggle('hidden');
-      switchAuth.textContent = loginForm.classList.contains('hidden') ? "Já tem conta? Faça Login" : "Não tem conta? Registe-se";
-    });
-
-    logoutBtn.addEventListener('click', logout);
-    startGameBtn.addEventListener('click', startGame);
+    // ================= EVENTOS DE MOVIMENTO ================= //
 
     const authTabs = document.getElementById('auth-tabs');
     if (authTabs) {
       authTabs.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') {
           const tab = e.target.getAttribute('data-tab');
-          
-          // Atualiza estilo dos botões
           authTabs.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
           e.target.classList.add('active');
 
-          // Alterna os formulários
           if (tab === 'login') {
             loginForm.classList.remove('hidden');
             signupForm.classList.add('hidden');
@@ -942,12 +942,26 @@
       });
     }
 
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await login(document.getElementById('login-email').value, document.getElementById('login-password').value);
+    });
 
-    // Player controls
-    let keys = {
-      ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false,
-      w: false, a: false, s: false, d: false
-    };
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await signup(document.getElementById('signup-email').value, document.getElementById('signup-password').value);
+    });
+
+    switchAuth.addEventListener('click', () => {
+      loginForm.classList.toggle('hidden');
+      signupForm.classList.toggle('hidden');
+      switchAuth.textContent = loginForm.classList.contains('hidden') ? "Já tem conta? Faça Login" : "Não tem conta? Registe-se";
+    });
+
+    logoutBtn.addEventListener('click', logout);
+    startGameBtn.addEventListener('click', startGame);
+
+    let keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false, w: false, a: false, s: false, d: false };
 
     document.addEventListener('keydown', (e) => {
       if (keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true;
@@ -963,8 +977,7 @@
     function shootBullet() {
       if (gameOver || levelUp) return;
 
-      let targetX = playerEntity.x + 100;
-      let targetY = playerEntity.y;
+      let targetX = playerEntity.x + 100, targetY = playerEntity.y;
 
       if (enemies.length > 0) {
         let closest = enemies[0];
@@ -980,43 +993,44 @@
       const angle = Math.atan2(targetY - (playerEntity.y + 20), targetX - (playerEntity.x + 20));
 
       bullets.push({
-        x: playerEntity.x + 20,
-        y: playerEntity.y + 20,
+        x: playerEntity.x + 22,
+        y: playerEntity.y + 22,
         vx: Math.cos(angle) * bulletSpeed,
-        vy: Math.sin(angle) * bulletSpeed,
-        width: 8, height: 8
+        vy: Math.sin(angle) * bulletSpeed
       });
     }
 
     function updatePlayer() {
-      if (!gameOver && !levelUp) {
-        if ((keys.ArrowLeft || keys.a) && playerEntity.x > 0) {
-          playerEntity.x -= playerSpeed;
-        }
-        if ((keys.ArrowRight || keys.d) && playerEntity.x < canvasWidth - playerEntity.width) {
-          playerEntity.x += playerSpeed;
-        }
-        if ((keys.ArrowUp || keys.w) && playerEntity.y > 0) {
-          playerEntity.y -= playerSpeed;
-        }
-        if ((keys.ArrowDown || keys.s) && playerEntity.y < canvasHeight - playerEntity.height) {
-          playerEntity.y += playerSpeed;
-        }
+      if (gameOver || levelUp) return;
+
+      playerEntity.isMoving = false;
+
+      if ((keys.ArrowLeft || keys.a) && playerEntity.x > 0) {
+        playerEntity.x -= playerSpeed;
+        playerEntity.isMoving = true;
+        playerEntity.facingLeft = true;
+      }
+      if ((keys.ArrowRight || keys.d) && playerEntity.x < canvasWidth - playerEntity.width) {
+        playerEntity.x += playerSpeed;
+        playerEntity.isMoving = true;
+        playerEntity.facingLeft = false;
+      }
+      if ((keys.ArrowUp || keys.w) && playerEntity.y > 0) {
+        playerEntity.y -= playerSpeed;
+        playerEntity.isMoving = true;
+      }
+      if ((keys.ArrowDown || keys.s) && playerEntity.y < canvasHeight - playerEntity.height) {
+        playerEntity.y += playerSpeed;
+        playerEntity.isMoving = true;
       }
     }
 
-    // Initial session check
     async function checkSession() {
       try {
         const { data, error } = await _supabase.auth.getSession();
-        if (error || !data || !data.session) {
-          resetUI();
-        } else {
-          user = data.session.user;
-          await fetchProfile();
-        }
+        if (error || !data || !data.session) resetUI();
+        else { user = data.session.user; await fetchProfile(); }
       } catch (err) {
-        console.warn('Serviço offline. A carregar tela de login.', err);
         resetUI();
       }
     }
