@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cinna Evolution</title>
+  <meta name="description" content="Um jogo de sobrevivência em arena inspirado no Cinnamoroll com salvamento em nuvem no Supabase." />
+
+  <!-- ============ SUPABASE JS SDK (CDN) ============ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ============ STYLES ============ -->
+  <style>
+    /* ---------- Design tokens & reset (Tema Cinnamoroll) ---------- */
+    :root {
+      --bg:        #0c121e;
+      --bg-2:      #141c2e;
+      --panel:     #1b263b;
+      --panel-2:   #23324f;
+      --border:    #32466e;
+      --text:      #f0f5ff;
+      --muted:     #8ca2cc;
+      --primary:   #a2d2ff; /* Azul Cinnamoroll */
+      --primary-2: #80bfff;
+      --danger:    #ffb5a7; /* Rosa Suave */
+      --success:   #b7e4c7;
+      --warning:   #ffe5ec;
+      --xp:        #c8b6ff; /* Lilás Suave */
+      --hp:        #ff9ebb;
+      --hp-empty:  #3a2027;
+      --radius:    14px;
+      --shadow:    0 12px 32px rgba(0,0,0,0.45);
+      --font:      "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      --mono:      "Consolas", "SFMono-Regular", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: radial-gradient(1200px 600px at 50% -10%, #1e2c4a 0%, var(--bg) 60%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app { width: 100%; max-width: 1080px; }
+
+    /* ---------- Shared UI ---------- */
+    .card {
+      background: linear-gradient(180deg, var(--panel) 0%, var(--bg-2) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 11px 16px;
+      transition: transform .08s ease, background .15s ease, opacity .15s ease;
+    }
+    button:active { transform: translateY(1px) scale(0.99); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-primary { background: var(--primary); color: #0a192f; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-2); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { background: var(--panel-2); }
+    .btn-danger { background: rgba(255,181,167,0.15); color: var(--danger); border: 1px solid rgba(255,181,167,0.4); }
+    .btn-danger:hover:not(:disabled) { background: rgba(255,181,167,0.25); }
+
+    input[type="email"], input[type="password"] {
+      width: 100%;
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 13px;
+      outline: none;
+      transition: border-color .15s ease;
+    }
+    input:focus { border-color: var(--primary); }
+
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+
+    .hidden { display: none !important; }
+
+    .notice { font-size: 13px; margin-top: 12px; min-height: 18px; line-height: 1.4; }
+    .notice.ok  { color: var(--success); }
+    .notice.err { color: var(--danger); }
+
+    /* ---------- AUTH ---------- */
+    .auth-shell { max-width: 420px; margin: 0 auto; }
+    .auth-card { padding: 28px; }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, var(--primary), var(--xp));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .tagline { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 22px; }
+
+    .auth-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .auth-tabs button {
+      flex: 1;
+      background: var(--bg);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 10px;
+      font-weight: 600;
+    }
+    .auth-tabs button.active { background: var(--panel-2); color: var(--text); border-color: var(--primary); }
+
+    .auth-form button[type="submit"] { width: 100%; margin-top: 4px; }
+    .switch-auth { text-align: center; margin-top: 16px; font-size: 13px; color: var(--muted); }
+    .switch-auth a { color: var(--primary); cursor: pointer; font-weight: 600; }
+
+    /* ---------- DASHBOARD ---------- */
+    .dashboard { padding: 24px; }
+    .dash-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .user-info { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--xp));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 18px; color: #0a192f;
+    }
+    .user-meta .email { font-weight: 700; font-size: 15px; }
+    .user-meta .sub   { font-size: 12px; color: var(--muted); }
+
+    .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat-tile {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-tile .value { font-size: 26px; font-weight: 800; font-family: var(--mono); }
+    .stat-tile .label { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+    .stat-tile.hi .value { color: var(--warning); }
+    .stat-tile.coin .value { color: var(--success); }
+    .stat-tile.kill .value { color: var(--danger); }
+
+    .achievements { margin-bottom: 22px; }
+    .achievements h3 { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+    .ach-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ach {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 999px; padding: 7px 13px; font-size: 13px; color: var(--muted);
+    }
+    .ach.unlocked { color: var(--text); border-color: rgba(255,229,236,0.5); background: rgba(255,229,236,0.08); }
+    .ach .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+    .ach.unlocked .dot { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+
+    .dash-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .dash-actions .btn-primary { flex: 1; min-width: 180px; padding: 15px; font-size: 17px; }
+
+    .loading-line { color: var(--muted); font-size: 13px; margin-top: 12px; }
+
+    /* ---------- GAME ---------- */
+    .game-shell { padding: 18px; }
+    .game-hud {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .hud-block { display: flex; flex-direction: column; gap: 6px; }
+    .hud-right { align-items: flex-end; }
+
+    .hud-row { display: flex; gap: 18px; font-size: 14px; font-weight: 700; }
+    .hud-row .k { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; margin-right: 4px; }
+
+    .bar { width: 240px; max-width: 45vw; }
+    .bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 700; }
+    .bar-track { height: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width .12s linear; }
+    .bar-fill.hp { background: linear-gradient(90deg, #ffb5a7, var(--hp)); }
+    .bar-fill.xp { background: linear-gradient(90deg, #d8bbff, var(--xp)); }
+
+    .wave-timer { text-align: center; }
+    .wave-timer .lvl { font-size: 15px; font-weight: 800; color: var(--xp); }
+    .wave-timer .time { font-family: var(--mono); font-size: 26px; font-weight: 800; }
+
+    .canvas-wrap { position: relative; width: 100%; }
+    #game-canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 10px;
+      background: #080d17;
+      border: 1px solid var(--border);
+    }
+
+    /* Overlays */
+    .overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(8,13,23,0.85);
+      border-radius: 10px;
+      backdrop-filter: blur(4px);
+    }
+
+    .overlay-inner { text-align: center; max-width: 520px; width: 90%; } 
+    .overlay-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; } 
+    .overlay-sub { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+
+    /* Level-up upgrade cards */
+    .upgrade-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+    .upgrade-card {
+      text-align: left;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      color: var(--text);
+      display: flex; flex-direction: column; gap: 6px;
+      cursor: pointer;
+    }
+    .upgrade-card:hover:not(:disabled) { border-color: var(--xp); background: var(--panel-2); }
+    .upgrade-card .u-name { font-weight: 800; font-size: 15px; }
+    .upgrade-card .u-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .upgrade-card .u-icon { font-size: 20px; }
+
+    /* Game over stats */
+    .go-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+    .go-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .go-stat .v { font-size: 20px; font-weight: 800; font-family: var(--mono); }
+    .go-stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 3px; }
+    .go-actions { display: flex; gap: 10px; justify-content: center; }
+    .go-actions .btn-primary { flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- AUTH SHELL -->
+    <div class="auth-shell hidden" id="auth-shell">
+      <div class="auth-card card">
+        <div class="logo">CINNA EVOLUTION</div>
+        <div class="tagline">Evolua, flutue e sobreviva...</div>
+
+        <!-- AUTH TABS -->
+        <div class="auth-tabs" id="auth-tabs">
+          <button class="active" data-tab="login">LOGIN</button>
+          <button data-tab="signup">SIGN UP</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form class="auth-form" id="login-form">
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" required placeholder="seuemail@exemplo.com">
+          </div>
+          <div class="field">
+            <label for="login-password">Senha</label>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn-primary">LOGIN</button>
+          <div class="notice" id="login-notice"></div>
+        </form>
+
+        <!-- SIGNUP FORM -->
+        <form class="auth-form hidden" id="signup-form">
+          <div class="field">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" required placeholder="seuemail@exemplo.com">
+          </div>
+          <div class="field">
+            <label for="signup-password">Senha</label>
+            <input type="password" id="signup-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn-primary">CRIAR CONTA</button>
+          <div class="notice" id="signup-notice"></div>
+        </form>
+
+        <!-- SWITCH AUTH -->
+        <div class="switch-auth">
+          <a id="switch-auth">Não tem conta? Registe-se</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD SHELL -->
+    <div class="dashboard-shell hidden" id="dashboard-shell">
+      <div class="dashboard card">
+        <div class="dash-top">
+          <div class="user-info">
+            <div class="avatar" id="user-avatar">C</div>
+            <div class="user-meta">
+              <div class="email" id="user-email"></div>
+              <div class="sub" id="user-sub">Conectado na nuvem</div>
+            </div>
+          </div>
+          <button class="btn-danger" id="logout-btn">SAIR</button>
+        </div>
+
+        <!-- STATS GRID -->
+        <div class="dash-grid">
+          <div class="stat-tile hi">
+            <div class="value" id="user-level">1</div>
+            <div class="label">NÍVEL</div>
+          </div>
+          <div class="stat-tile coin">
+            <div class="value" id="user-xp">0</div>
+            <div class="label">XP</div>
+          </div>
+          <div class="stat-tile kill">
+            <div class="value" id="user-kills">0</div>
+            <div class="label">KILLS</div>
+          </div>
+        </div>
+
+        <!-- ACHIEVEMENTS -->
+        <div class="achievements">
+          <h3>CONQUISTAS</h3>
+          <div class="ach-list">
+            <div class="ach" id="ach-1">
+              <span class="dot"></span> Nível 5
+            </div>
+            <div class="ach" id="ach-2">
+              <span class="dot"></span> 100 Kills
+            </div>
+            <div class="ach" id="ach-3">
+              <span class="dot"></span> 1000 XP
+            </div>
+          </div>
+        </div>
+
+        <!-- DASHBOARD ACTIONS -->
+        <div class="dash-actions">
+          <button class="btn-primary" id="start-game-btn">INICIAR JOGO</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME SHELL -->
+    <div class="game-shell hidden" id="game-shell">
+      <div class="game-hud">
+        <div class="hud-block">
+          <div class="hud-row">
+            <div class="k">HP</div>
+            <div class="bar" id="hp-bar">
+              <div class="bar-track">
+                <div class="bar-fill hp" id="hp-fill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="hud-row">
+            <div class="k">XP</div>
+            <div class="bar" id="xp-bar">
+              <div class="bar-track">
+                <div class="bar-fill xp" id="xp-fill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hud-block hud-right">
+          <div class="wave-timer" id="wave-timer">
+            <div class="lvl">ONDA <span id="wave-number">1</span></div>
+            <div class="time" id="wave-time">0:00</div>
+          </div>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="game-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- OVERLAYS -->
+    <div class="overlay hidden" id="level-up-overlay">
+      <div class="overlay-inner">
+        <div class="overlay-title" style="color: var(--xp);">LEVEL UP!</div>
+        <div class="overlay-sub">Escolha uma melhoria:</div>
+        <div class="upgrade-grid" id="upgrade-grid"></div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="game-over-overlay">
+      <div class="overlay-inner">
+        <div class="overlay-title" style="color: var(--danger);">GAME OVER</div>
+        <div class="overlay-sub">Suas estatísticas:</div>
+        <div class="go-stats" id="go-stats">
+          <div class="go-stat">
+            <div class="v" id="go-level">1</div>
+            <div class="l">NÍVEL</div>
+          </div>
+          <div class="go-stat">
+            <div class="v" id="go-xp">0</div>
+            <div class="l">XP</div>
+          </div>
+          <div class="go-stat">
+            <div class="v" id="go-kills">0</div>
+            <div class="l">KILLS</div>
+          </div>
+          <div class="go-stat">
+            <div class="v" id="go-time">0:00</div>
+            <div class="l">TEMPO</div>
+          </div>
+        </div>
+        <div class="go-actions">
+          <button class="btn-primary" id="retry-btn">JOGAR NOVAMENTE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ JAVASCRIPT LOGIC ============ -->
+  <script>
+    // Supabase client setup
+    const supabaseUrl = 'https://xviolnsyxdtujcgffiny.supabase.co';
+    const supabaseKey = 'sb_publishable_D2aF4t8w-09dw96--bzcbA_or0E6b0N';
+    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // UI elements
+    const authShell = document.getElementById('auth-shell');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const switchAuth = document.getElementById('switch-auth');
+    const loginNotice = document.getElementById('login-notice');
+    const signupNotice = document.getElementById('signup-notice');
+    const dashboardShell = document.getElementById('dashboard-shell');
+    const userEmail = document.getElementById('user-email');
+    const userAvatar = document.getElementById('user-avatar');
+    const userLevel = document.getElementById('user-level');
+    const userXp = document.getElementById('user-xp');
+    const userKills = document.getElementById('user-kills');
+    const logoutBtn = document.getElementById('logout-btn');
+    const startGameBtn = document.getElementById('start-game-btn');
+    const gameShell = document.getElementById('game-shell');
+    const hpFill = document.getElementById('hp-fill');
+    const xpFill = document.getElementById('xp-fill');
+    const waveNumber = document.getElementById('wave-number');
+    const waveTime = document.getElementById('wave-time');
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const levelUpOverlay = document.getElementById('level-up-overlay');
+    const gameOverOverlay = document.getElementById('game-over-overlay');
+    const upgradeGrid = document.getElementById('upgrade-grid');
+    const retryBtn = document.getElementById('retry-btn');
+
+    // User & Game state
+    let user = null;
+    let player = null;
+    let gameInterval = null;
+    let waveInterval = null;
+    let autoShootInterval = null;
+    let levelUp = false;
+    let gameOver = false;
+
+    // Game constants
+    const canvasWidth = 800;
+    const canvasHeight = 600;
+    let playerSpeed = 5;
+    let enemySpeed = 2;
+    let bulletSpeed = 10;
+    const spawnInterval = 1000;
+    const waveDuration = 20000;
+
+    let playerEntity = {
+      x: canvasWidth / 2 - 20,
+      y: canvasHeight / 2 - 20,
+      width: 40,
+      height: 40
+    };
+
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    // Load assets
+    const playerImage = new Image();
+    playerImage.src = 'player.png';
+
+    const enemyImage = new Image();
+    enemyImage.src = 'enemy.png';
+
+    const bulletImage = new Image();
+    bulletImage.src = 'bullet.png';
+
+    let enemies = [];
+    let bullets = [];
+    let level = 1;
+    let xp = 0;
+    let kills = 0;
+    let waveStart = Date.now();
+    let waveEnd = waveStart + waveDuration;
+
+    // Auth functions
+    async function login(email, password) {
+      loginNotice.textContent = 'A autenticar...';
+      loginNotice.className = 'notice';
+      const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        loginNotice.textContent = error.message;
+        loginNotice.classList.add('err');
+      } else {
+        user = data.user;
+        await fetchProfile();
+      }
+    }
+
+    async function signup(email, password) {
+      signupNotice.textContent = 'A criar conta...';
+      signupNotice.className = 'notice';
+      
+      const { data, error } = await _supabase.auth.signUp({ email, password });
+      
+      if (error) {
+        signupNotice.textContent = error.message;
+        signupNotice.classList.add('err');
+      } else {
+        user = data.user;
+        
+        // Se a sessão foi criada de imediato
+        if (data.session) {
+          signupNotice.textContent = 'Conta criada com sucesso!';
+          signupNotice.classList.add('ok');
+          await createProfile();
+        } else {
+          // Se o Supabase exigir login manual após criar conta
+          signupNotice.textContent = 'Registo efetuado! A iniciar sessão...';
+          await login(email, password);
+        }
+      }
+    }
+
+    async function logout() {
+      await _supabase.auth.signOut();
+      user = null;
+      player = null;
+      resetUI();
+    }
+
+    async function fetchProfile() {
+      if (!user) return;
+      const { data, error } = await _supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (error) {
+        await createProfile();
+      } else {
+        player = data;
+        updateUI();
+        showDashboard();
+      }
+    }
+
+    async function createProfile() {
+      if (!user) return;
+      const { data, error } = await _supabase.from('profiles').insert([
+        { id: user.id, level: 1, xp: 0, kills: 0, hp: 100, max_hp: 100 }
+      ]).select();
+      if (!error && data) {
+        player = data[0];
+        updateUI();
+        showDashboard();
+      }
+    }
+
+    // UI functions
+    function resetUI() {
+      authShell.classList.remove('hidden');
+      dashboardShell.classList.add('hidden');
+      gameShell.classList.add('hidden');
+      levelUpOverlay.classList.add('hidden');
+      gameOverOverlay.classList.add('hidden');
+    }
+
+    function showDashboard() {
+      authShell.classList.add('hidden');
+      dashboardShell.classList.remove('hidden');
+      gameShell.classList.add('hidden');
+      if (user && player) {
+        userEmail.textContent = user.email;
+        userAvatar.textContent = user.email[0].toUpperCase();
+        userLevel.textContent = player.level || 1;
+        userXp.textContent = player.xp || 0;
+        userKills.textContent = player.kills || 0;
+      }
+    }
+
+    function startGame() {
+      dashboardShell.classList.add('hidden');
+      gameShell.classList.remove('hidden');
+      gameOverOverlay.classList.add('hidden');
+      levelUpOverlay.classList.add('hidden');
+      
+      playerEntity.x = canvasWidth / 2 - 20;
+      playerEntity.y = canvasHeight / 2 - 20;
+
+      clearInterval(gameInterval);
+      clearInterval(waveInterval);
+      clearInterval(autoShootInterval);
+
+      if (!player) {
+        player = { level: 1, xp: 0, kills: 0, hp: 100, max_hp: 100 };
+      } else {
+        player.hp = player.max_hp || 100;
+      }
+
+      gameOver = false;
+      levelUp = false;
+
+      gameLoop();
+      spawnEnemies();
+      startWaveTimer();
+
+      autoShootInterval = setInterval(() => {
+        if (!gameOver && !levelUp) shootBullet();
+      }, 400);
+    }
+
+    function updateUI() {
+      if (!user || !player) return;
+      userEmail.textContent = user.email;
+      userLevel.textContent = player.level;
+      userXp.textContent = player.xp;
+      userKills.textContent = player.kills;
+      
+      const currentHp = Math.max(0, player.hp);
+      const maxHpVal = player.max_hp || 100;
+      hpFill.style.width = `${(currentHp / maxHpVal) * 100}%`;
+      xpFill.style.width = `${Math.min(100, (player.xp / 100) * 100)}%`;
+
+      const ach1 = document.getElementById('ach-1');
+      const ach2 = document.getElementById('ach-2');
+      const ach3 = document.getElementById('ach-3');
+
+      if (ach1) ach1.classList.toggle('unlocked', player.level >= 5);
+      if (ach2) ach2.classList.toggle('unlocked', player.kills >= 100);
+      if (ach3) ach3.classList.toggle('unlocked', player.xp >= 1000);
+    }
+
+    // Game loop & physics
+    function gameLoop() {
+      gameInterval = setInterval(() => {
+        if (!gameOver && !levelUp) {
+          updateEntities();
+          renderEntities();
+        }
+      }, 16);
+    }
+
+    function spawnEnemies() {
+      waveInterval = setInterval(() => {
+        if (!gameOver && !levelUp) {
+          enemies.push(createEnemy());
+        }
+      }, spawnInterval);
+    }
+
+    function createEnemy() {
+      const side = Math.floor(Math.random() * 4);
+      let x, y;
+      if (side === 0) { x = Math.random() * canvasWidth; y = -40; }
+      else if (side === 1) { x = canvasWidth + 40; y = Math.random() * canvasHeight; }
+      else if (side === 2) { x = Math.random() * canvasWidth; y = canvasHeight + 40; }
+      else { x = -40; y = Math.random() * canvasHeight; }
+
+      return { x, y, speed: enemySpeed, width: 30, height: 30 };
+    }
+
+    function updateEntities() {
+      updatePlayer();
+
+      enemies.forEach((enemy) => {
+        const dx = playerEntity.x - enemy.x;
+        const dy = playerEntity.y - enemy.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 0) {
+          enemy.x += (dx / dist) * enemy.speed;
+          enemy.y += (dy / dist) * enemy.speed;
+        }
+      });
+
+      bullets.forEach((bullet, index) => {
+        bullet.x += bullet.vx;
+        bullet.y += bullet.vy;
+
+        if (bullet.x < 0 || bullet.x > canvasWidth || bullet.y < 0 || bullet.y > canvasHeight) {
+          bullets.splice(index, 1);
+        }
+      });
+
+      bullets.forEach((bullet, bulletIndex) => {
+        enemies.forEach((enemy, enemyIndex) => {
+          if (bullet.x < enemy.x + enemy.width &&
+              bullet.x + bullet.width > enemy.x &&
+              bullet.y < enemy.y + enemy.height &&
+              bullet.y + bullet.height > enemy.y) {
+            enemies.splice(enemyIndex, 1);
+            bullets.splice(bulletIndex, 1);
+            kills++;
+            player.kills = (player.kills || 0) + 1;
+            player.xp = (player.xp || 0) + 20;
+            updateUI();
+            checkLevelUp();
+          }
+        });
+      });
+
+      enemies.forEach((enemy, index) => {
+        if (playerEntity.x < enemy.x + enemy.width &&
+            playerEntity.x + playerEntity.width > enemy.x &&
+            playerEntity.y < enemy.y + enemy.height &&
+            playerEntity.y + playerEntity.height > enemy.y) {
+          player.hp -= 10;
+          enemies.splice(index, 1);
+          updateUI();
+          if (player.hp <= 0) {
+            gameOver = true;
+            showGameOver();
+          }
+        }
+      });
+    }
+
+    function renderEntities() {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      // Render Inimigos
+      enemies.forEach(enemy => {
+        if (enemyImage.complete && enemyImage.naturalWidth !== 0) {
+          ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
+        } else {
+          ctx.fillStyle = '#ffb5a7'; // Rosa Cinnamoroll
+          ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        }
+      });
+
+      // Render Projéteis
+      bullets.forEach(bullet => {
+        if (bulletImage.complete && bulletImage.naturalWidth !== 0) {
+          ctx.drawImage(bulletImage, bullet.x, bullet.y, bullet.width, bullet.height);
+        } else {
+          ctx.fillStyle = '#ffe5ec';
+          ctx.beginPath();
+          ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Render Jogador (Azul Nuvens Cinnamoroll)
+      if (playerImage.complete && playerImage.naturalWidth !== 0) {
+        ctx.drawImage(playerImage, playerEntity.x, playerEntity.y, playerEntity.width, playerEntity.height);
+      } else {
+        ctx.fillStyle = '#a2d2ff';
+        ctx.fillRect(playerEntity.x, playerEntity.y, playerEntity.width, playerEntity.height);
+      }
+    }
+
+    function startWaveTimer() {
+      waveStart = Date.now();
+      waveEnd = waveStart + waveDuration;
+      
+      waveInterval = setInterval(() => {
+        if (gameOver || levelUp) return;
+        const now = Date.now();
+        const timeLeft = waveEnd - now;
+        const minutes = Math.floor((timeLeft % 3600000) / 60000);
+        const seconds = Math.floor((timeLeft % 60000) / 1000);
+        waveTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(waveInterval);
+          nextWave();
+        }
+      }, 1000);
+    }
+
+    function nextWave() {
+      level++;
+      player.level = (player.level || 1) + 1;
+      updateUI();
+      waveNumber.textContent = level;
+      startWaveTimer();
+    }
+
+    function checkLevelUp() {
+      if (player.xp >= 100) {
+        levelUp = true;
+        player.level = (player.level || 1) + 1;
+        player.xp -= 100;
+        player.max_hp = (player.max_hp || 100) + 10;
+        player.hp = player.max_hp;
+        updateUI();
+        showLevelUp();
+      }
+    }
+
+    function showLevelUp() {
+      levelUpOverlay.classList.remove('hidden');
+      upgradeGrid.innerHTML = '';
+
+      const upgrades = [
+        { name: 'HP + 10', desc: 'Aumenta a vida máxima.', icon: '❤️', effect: () => { player.max_hp += 10; player.hp = player.max_hp; } },
+        { name: 'Velocidade + 1', desc: 'Movimente-se mais rápido.', icon: '💨', effect: () => { playerSpeed += 1; } },
+        { name: 'Dano + 2', desc: 'Projetil mais rápido.', icon: '⚔️', effect: () => { bulletSpeed += 2; } }
+      ];
+
+      upgrades.forEach(upgrade => {
+        const card = document.createElement('div');
+        card.classList.add('upgrade-card');
+        card.innerHTML = `
+          <div class="u-icon">${upgrade.icon}</div>
+          <div class="u-name">${upgrade.name}</div>
+          <div class="u-desc">${upgrade.desc}</div>
+        `;
+        card.onclick = () => {
+          upgrade.effect();
+          levelUpOverlay.classList.add('hidden');
+          levelUp = false;
+        };
+        upgradeGrid.appendChild(card);
+      });
+    }
+
+    function showGameOver() {
+      clearInterval(gameInterval);
+      clearInterval(waveInterval);
+      clearInterval(autoShootInterval);
+      gameOverOverlay.classList.remove('hidden');
+
+      document.getElementById('go-level').textContent = player.level || 1;
+      document.getElementById('go-xp').textContent = player.xp || 0;
+      document.getElementById('go-kills').textContent = player.kills || 0;
+      document.getElementById('go-time').textContent = waveTime.textContent;
+
+      saveGameStats();
+
+      retryBtn.onclick = () => {
+        gameOverOverlay.classList.add('hidden');
+        resetGame();
+      };
+    }
+
+    async function saveGameStats() {
+      if (!user || !player) return;
+      const { error } = await _supabase
+        .from('profiles')
+        .update({
+          level: player.level,
+          xp: player.xp,
+          kills: player.kills,
+          hp: player.hp,
+          max_hp: player.max_hp
+        })
+        .eq('id', user.id);
+
+      if (error) console.error('Error saving game stats:', error);
+    }
+
+    function resetGame() {
+      enemies = [];
+      bullets = [];
+      level = 1;
+      kills = 0;
+      gameOver = false;
+      player.hp = player.max_hp || 100;
+      clearInterval(gameInterval);
+      clearInterval(waveInterval);
+      clearInterval(autoShootInterval);
+      waveNumber.textContent = '1';
+      waveTime.textContent = '0:00';
+      hpFill.style.width = '100%';
+      updateUI();
+      startGame();
+    }
+
+    // Event listeners
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      await login(email, password);
+    });
+
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      await signup(email, password);
+    });
+
+    switchAuth.addEventListener('click', () => {
+      loginForm.classList.toggle('hidden');
+      signupForm.classList.toggle('hidden');
+      switchAuth.textContent = loginForm.classList.contains('hidden') ? "Já tem conta? Faça Login" : "Não tem conta? Registe-se";
+    });
+
+    logoutBtn.addEventListener('click', logout);
+    startGameBtn.addEventListener('click', startGame);
+
+    const authTabs = document.getElementById('auth-tabs');
+    if (authTabs) {
+      authTabs.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+          const tab = e.target.getAttribute('data-tab');
+          
+          // Atualiza estilo dos botões
+          authTabs.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+          e.target.classList.add('active');
+
+          // Alterna os formulários
+          if (tab === 'login') {
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+            switchAuth.textContent = "Não tem conta? Registe-se";
+          } else {
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+            switchAuth.textContent = "Já tem conta? Faça Login";
+          }
+        }
+      });
+    }
+
+
+    // Player controls
+    let keys = {
+      ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false,
+      w: false, a: false, s: false, d: false
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true;
+      if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+      if (e.key === ' ') shootBullet();
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false;
+      if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+    });
+
+    function shootBullet() {
+      if (gameOver || levelUp) return;
+
+      let targetX = playerEntity.x + 100;
+      let targetY = playerEntity.y;
+
+      if (enemies.length > 0) {
+        let closest = enemies[0];
+        let minDist = Infinity;
+        enemies.forEach(e => {
+          let d = Math.hypot(e.x - playerEntity.x, e.y - playerEntity.y);
+          if (d < minDist) { minDist = d; closest = e; }
+        });
+        targetX = closest.x + closest.width / 2;
+        targetY = closest.y + closest.height / 2;
+      }
+
+      const angle = Math.atan2(targetY - (playerEntity.y + 20), targetX - (playerEntity.x + 20));
+
+      bullets.push({
+        x: playerEntity.x + 20,
+        y: playerEntity.y + 20,
+        vx: Math.cos(angle) * bulletSpeed,
+        vy: Math.sin(angle) * bulletSpeed,
+        width: 8, height: 8
+      });
+    }
+
+    function updatePlayer() {
+      if (!gameOver && !levelUp) {
+        if ((keys.ArrowLeft || keys.a) && playerEntity.x > 0) {
+          playerEntity.x -= playerSpeed;
+        }
+        if ((keys.ArrowRight || keys.d) && playerEntity.x < canvasWidth - playerEntity.width) {
+          playerEntity.x += playerSpeed;
+        }
+        if ((keys.ArrowUp || keys.w) && playerEntity.y > 0) {
+          playerEntity.y -= playerSpeed;
+        }
+        if ((keys.ArrowDown || keys.s) && playerEntity.y < canvasHeight - playerEntity.height) {
+          playerEntity.y += playerSpeed;
+        }
+      }
+    }
+
+    // Initial session check
+    async function checkSession() {
+      try {
+        const { data, error } = await _supabase.auth.getSession();
+        if (error || !data || !data.session) {
+          resetUI();
+        } else {
+          user = data.session.user;
+          await fetchProfile();
+        }
+      } catch (err) {
+        console.warn('Serviço offline. A carregar tela de login.', err);
+        resetUI();
+      }
+    }
+
+    checkSession();
+  </script>
+</body>
+</html>
